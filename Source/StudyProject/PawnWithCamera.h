@@ -50,12 +50,21 @@ protected:
 	float PawnSpeed = 200.f;
 
 	UPROPERTY(EditAnywhere)
+	float PawnRunSpeed = 400.f;
+
+	UPROPERTY(EditAnywhere)
 	float CameraLagSpeed = 3.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bWobble = false;
+
 
 	FVector2D MovementInput;
 	FVector2D CameraInput;
 	float ZoomFactor;
 	bool bZoomingIn;
+	bool bRunning;
+	
 
 public:	
 	// Called every frame
@@ -70,5 +79,7 @@ public:
 	void YawCamera(float AxisValue);
 	void ZoomIn();
 	void ZoomOut();
+	void Run();
+	void Wobble();
 
 };
