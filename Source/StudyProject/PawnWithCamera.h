@@ -28,6 +28,30 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* CameraComp;
 
+	UPROPERTY(EditAnywhere)
+	float ZoomInFactor = 0.5f;
+
+	UPROPERTY(EditAnywhere)
+	float ZoomOutFactor = 0.25f;
+
+	UPROPERTY(EditAnywhere)
+	float MaxZoom = 300.f;
+
+	UPROPERTY(EditAnywhere)
+	float MinZoom = 400.f;
+
+	UPROPERTY(EditAnywhere)
+	float MaxFov = 90.f;
+
+	UPROPERTY(EditAnywhere)
+	float MinFov = 60.f;
+
+	UPROPERTY(EditAnywhere)
+	float PawnSpeed = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	float CameraLagSpeed = 3.f;
+
 	FVector2D MovementInput;
 	FVector2D CameraInput;
 	float ZoomFactor;

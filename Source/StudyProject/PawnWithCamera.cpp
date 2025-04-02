@@ -24,9 +24,9 @@ APawnWithCamera::APawnWithCamera()
 
 	//assign spring arm properties
 	SpringArmComp->SetRelativeLocationAndRotation(FVector(.0f, .0f, 50.0f), FRotator(-60.0f, .0f, .0f));
-	SpringArmComp->TargetArmLength = 400.f;
+	SpringArmComp->TargetArmLength = MinZoom;
 	SpringArmComp->bEnableCameraLag = true;
-	SpringArmComp->CameraLagSpeed = 3.f;
+	SpringArmComp->CameraLagSpeed = CameraLagSpeed;
 
 	//possess default player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -48,17 +48,17 @@ void APawnWithCamera::Tick(float DeltaTime)
 	//handle camera zoom
 	if (bZoomingIn)
 	{
-		ZoomFactor += DeltaTime / .5f;
+		ZoomFactor += DeltaTime / ZoomInFactor;
 	}
 	else
 	{
-		ZoomFactor -= DeltaTime / .25f;
+		ZoomFactor -= DeltaTime / ZoomOutFactor;
 	}
 	ZoomFactor = FMath::Clamp(ZoomFactor, .0f, 1.f);
 
 	//Blend our camera's FOV and our SpringArm's length based on ZoomFactor
-	CameraComp->FieldOfView = FMath::Lerp(90.f, 60.f, ZoomFactor);
-	SpringArmComp->TargetArmLength = FMath::Lerp(400.f, 300.f, ZoomFactor);
+	CameraComp->FieldOfView = FMath::Lerp(MaxFov, MinFov, ZoomFactor);
+	SpringArmComp->TargetArmLength = FMath::Lerp(MinZoom, MaxZoom, ZoomFactor);
 
 	//rotate our camera's yaw
 	FRotator NewYaw = GetActorRotation();
@@ -68,12 +68,13 @@ void APawnWithCamera::Tick(float DeltaTime)
 	//rotate our camera's pitch
 	FRotator NewPitch = SpringArmComp->GetComponentRotation();
 	NewPitch.Pitch = FMath::Clamp(NewPitch.Pitch + CameraInput.Y, -80.f, -15.f);
+	//NewPitch.Pitch += CameraInput.Y;
 	SpringArmComp->SetWorldRotation(NewPitch);
 
 	//handle movement
 	if (!MovementInput.IsZero())
 	{
-		MovementInput = MovementInput.GetSafeNormal() * 100.f;
+		MovementInput = MovementInput.GetSafeNormal() * PawnSpeed;
 		FVector NewLocation = GetActorLocation();
 		NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime;
 		NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
