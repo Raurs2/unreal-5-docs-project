@@ -65,7 +65,8 @@ protected:
 	bool bZoomingIn;
 	bool bRunning;
 	bool bResetWobble = false;
-	
+	bool bResetTimer = true;
+	FTimerHandle WobbleResetTimerHandle;
 	
 
 public:	
@@ -83,5 +84,6 @@ public:
 	void ZoomOut();
 	void Run();
 	void ResetWobble();
+	void ResetTimer();
 
 };

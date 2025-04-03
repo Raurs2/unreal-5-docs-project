@@ -40,7 +40,7 @@ void APawnWithCamera::BeginPlay()
 void APawnWithCamera::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    FTimerHandle WobbleResetTimerHandle;
+    
 
     // Handle camera zoom
     if (bZoomingIn)
@@ -108,18 +108,23 @@ void APawnWithCamera::Tick(float DeltaTime)
 
         ActorRotation.Yaw = FMath::FInterpTo(ActorRotation.Yaw, 0.0f, DeltaTime, 2.5f);
         SetActorRotation(ActorRotation);
-        bResetWobble = false;
+		bResetTimer = false;
+		if (!GetWorldTimerManager().IsTimerActive(WobbleResetTimerHandle))
+		{
+			GetWorldTimerManager().SetTimer(WobbleResetTimerHandle, this, &APawnWithCamera::ResetTimer, 3.f, false);
+		}
 	}
 
-    if (bWobble && MovementInput.IsZero() && CameraInput.IsZero())
+    if (bWobble && MovementInput.IsZero() && CameraInput.IsZero() && !GetWorldTimerManager().IsTimerActive(WobbleResetTimerHandle) && bResetTimer)
     {
-        
-        GetWorldTimerManager().SetTimer(WobbleResetTimerHandle, this, &APawnWithCamera::ResetWobble, .5f, false);
+        GetWorldTimerManager().SetTimer(WobbleResetTimerHandle, this, &APawnWithCamera::ResetWobble, 1.f, false);
+        UE_LOG(LogTemp, Display, TEXT("start timer"));
     }
     
-    if (bWobble && (!CameraInput.IsZero() || !MovementInput.IsZero()))
+    if (bWobble && (!CameraInput.IsZero() || !MovementInput.IsZero()) && bResetTimer && GetWorldTimerManager().IsTimerActive(WobbleResetTimerHandle))
     {
         GetWorldTimerManager().ClearTimer(WobbleResetTimerHandle);
+        UE_LOG(LogTemp, Display, TEXT("stop timer"));
     }
 
 }
@@ -176,5 +181,13 @@ void APawnWithCamera::Run()
 
 void APawnWithCamera::ResetWobble()
 {
-	bResetWobble = true;
+    bResetWobble = true;
+    UE_LOG(LogTemp, Display, TEXT("reset wobble"));
+}
+
+void APawnWithCamera::ResetTimer()
+{
+    bResetTimer = true;
+    bResetWobble = false;
+    UE_LOG(LogTemp, Display, TEXT("RESET timer"));
 }
