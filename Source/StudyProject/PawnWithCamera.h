@@ -64,6 +64,8 @@ protected:
 	float ZoomFactor;
 	bool bZoomingIn;
 	bool bRunning;
+	bool bResetWobble = false;
+	
 	
 
 public:	
@@ -80,6 +82,6 @@ public:
 	void ZoomIn();
 	void ZoomOut();
 	void Run();
-	void Wobble();
+	void ResetWobble();
 
 };

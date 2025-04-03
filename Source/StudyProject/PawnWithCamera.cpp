@@ -40,6 +40,7 @@ void APawnWithCamera::BeginPlay()
 void APawnWithCamera::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    FTimerHandle WobbleResetTimerHandle;
 
     // Handle camera zoom
     if (bZoomingIn)
@@ -69,8 +70,6 @@ void APawnWithCamera::Tick(float DeltaTime)
     // Handle movement
     if (!MovementInput.IsZero())
     {
-        
-
         if (!bRunning)
         {
             MovementInput = MovementInput.GetSafeNormal() * PawnSpeed;
@@ -79,33 +78,50 @@ void APawnWithCamera::Tick(float DeltaTime)
         {
             MovementInput = MovementInput.GetSafeNormal() * PawnRunSpeed;
         }
+
         FVector NewLocation = GetActorLocation();
         NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime;
         NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
         SetActorLocation(NewLocation);
     }
 
+	// Handle camera wobble
     if (bWobble && !MovementInput.IsZero())
     {
 		float randomPitch = FMath::RandRange(-.5f, .5f);
 		float randomYaw = FMath::RandRange(-.5f, .5f);
         float PitchWobble = FMath::Sin(GetWorld()->TimeSeconds * 3.f + randomPitch) * .1f;
         float YawWobble = FMath::Cos(GetWorld()->TimeSeconds * 3.f + randomYaw) * .1f;
+
         FRotator Wobble = SpringArmComp->GetComponentRotation();
         Wobble.Pitch += PitchWobble;
         Wobble.Yaw += YawWobble;
         SpringArmComp->SetWorldRotation(Wobble);
     }
-    else
+    else if (bWobble && MovementInput.IsZero() && CameraInput.IsZero() && bResetWobble)
     {
         FRotator SpringArmRotation = SpringArmComp->GetComponentRotation();
         SpringArmRotation.Pitch = FMath::FInterpTo(SpringArmRotation.Pitch, -30.0f, DeltaTime, 2.5f);
         SpringArmRotation.Yaw = FMath::FInterpTo(SpringArmRotation.Yaw, 0.0f, DeltaTime, 2.5f);
         SpringArmComp->SetWorldRotation(SpringArmRotation);
         FRotator ActorRotation = GetActorRotation();
+
         ActorRotation.Yaw = FMath::FInterpTo(ActorRotation.Yaw, 0.0f, DeltaTime, 2.5f);
         SetActorRotation(ActorRotation);
+        bResetWobble = false;
+	}
+
+    if (bWobble && MovementInput.IsZero() && CameraInput.IsZero())
+    {
+        
+        GetWorldTimerManager().SetTimer(WobbleResetTimerHandle, this, &APawnWithCamera::ResetWobble, .5f, false);
     }
+    
+    if (bWobble && (!CameraInput.IsZero() || !MovementInput.IsZero()))
+    {
+        GetWorldTimerManager().ClearTimer(WobbleResetTimerHandle);
+    }
+
 }
 
 // Called to bind functionality to input
@@ -156,4 +172,9 @@ void APawnWithCamera::ZoomOut()
 void APawnWithCamera::Run()
 {
     bRunning = !bRunning;
+}
+
+void APawnWithCamera::ResetWobble()
+{
+	bResetWobble = true;
 }
