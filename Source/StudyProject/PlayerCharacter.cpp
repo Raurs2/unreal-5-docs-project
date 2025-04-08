@@ -20,11 +20,12 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FQuat(FRotator(0.f, -90.f, 0.f)));
 
 	// Attaching classes Components
-	SpringArmComp->SetupAttachment(GetMesh());
+	SpringArmComp->SetupAttachment(RootComponent);
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 
 	// Setting class variables of the spring arm
 	SpringArmComp->bUsePawnControlRotation = true;
+	SpringArmComp->TargetArmLength = 300.f;
 
 	// Setting class variables of the Character movement component
 	GetCharacterMovement()->bOrientRotationToMovement = true;
