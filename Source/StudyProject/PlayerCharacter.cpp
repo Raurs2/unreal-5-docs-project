@@ -5,6 +5,10 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "FireEffect.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -31,6 +35,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bIgnoreBaseRotation = true;
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -91,6 +96,27 @@ void APlayerCharacter::EndCrouch()
 	UnCrouch();
 }
 
+void APlayerCharacter::FindActor()
+{
+	TArray<AActor*> ActorsToFind;
+
+	if (UWorld* World = GetWorld())
+	{
+		UGameplayStatics::GetAllActorsOfClass(World, AFireEffect::StaticClass(), ActorsToFind);
+	}
+
+	for (AActor* FireEffectAtor : ActorsToFind)
+	{
+		AFireEffect* FireEffectCast = Cast<AFireEffect>(FireEffectAtor);
+
+		if (FireEffectCast)
+		{
+			FireEffectCast->GetParticleFireComponent()->Deactivate();
+			FireEffectCast->GetFireAudioComponent()->Deactivate();
+		}
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -118,5 +144,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Bind the crouch functions to the input
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &APlayerCharacter::BeginCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &APlayerCharacter::EndCrouch);
+
+	// Bind the jump functions to the input
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	// Bind the find actor function to the input
+	PlayerInputComponent->BindAction("FindActor", IE_Pressed, this, &APlayerCharacter::FindActor);
 }
 

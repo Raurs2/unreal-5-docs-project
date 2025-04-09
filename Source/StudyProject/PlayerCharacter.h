@@ -41,6 +41,8 @@ protected:
 
 	void EndCrouch();
 
+	void FindActor();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
