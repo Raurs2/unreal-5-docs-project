@@ -29,13 +29,27 @@ APlayerCharacter::APlayerCharacter()
 
 	// Setting class variables of the spring arm
 	SpringArmComp->bUsePawnControlRotation = true;
-	SpringArmComp->TargetArmLength = 300.f;
+	SpringArmComp->TargetArmLength = CameraDistance;
+
+
+	bUseControllerRotationPitch = bDoPlayerRotateWithCamera;
+	bUseControllerRotationYaw = bDoPlayerRotateWithCamera;
+	bUseControllerRotationRoll = bDoPlayerRotateWithCamera;
 
 	// Setting class variables of the Character movement component
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bIgnoreBaseRotation = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
+	GetCharacterMovement()->AirControl = AirControl;
+	GetCharacterMovement()->BrakingDecelerationWalking = BrakDecelerateWalk;
+	GetCharacterMovement()->MinAnalogWalkSpeed = AnalogWalkSpeed;
+
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -78,12 +92,12 @@ void APlayerCharacter::MoveRight(float AxisValue)
 
 void APlayerCharacter::BeginSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
 
 void APlayerCharacter::EndSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void APlayerCharacter::BeginCrouch()
@@ -102,7 +116,8 @@ void APlayerCharacter::FindActor()
 
 	if (UWorld* World = GetWorld())
 	{
-		UGameplayStatics::GetAllActorsOfClass(World, AFireEffect::StaticClass(), ActorsToFind);
+		//UGameplayStatics::GetAllActorsOfClass(World, AFireEffect::StaticClass(), ActorsToFind);
+		UGameplayStatics::GetAllActorsOfClassWithTag(World, AFireEffect::StaticClass(), FName("FindActorTag"), ActorsToFind);
 	}
 
 	for (AActor* FireEffectAtor : ActorsToFind)
@@ -147,7 +162,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Bind the jump functions to the input
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &APlayerCharacter::StopJumping);
 
 	// Bind the find actor function to the input
 	PlayerInputComponent->BindAction("FindActor", IE_Pressed, this, &APlayerCharacter::FindActor);

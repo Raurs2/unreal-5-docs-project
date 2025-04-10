@@ -17,6 +17,8 @@ AFireEffect::AFireEffect()
 	ParticleFireComponent->SetupAttachment(RootComponent);
 	FireAudioComponent->AttachToComponent(ParticleFireComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	Tags.Add(FName("FindActorTag"));
+
 }
 
 // Called when the game starts or when spawned

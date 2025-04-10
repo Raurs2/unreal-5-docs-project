@@ -27,6 +27,34 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDoPlayerRotateWithCamera = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpSpeed = 600.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkSpeed = 600.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SprintSpeed = 1000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CrouchSpeed = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AirControl = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AnalogWalkSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BrakDecelerateWalk = 2000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CameraDistance = 300.f;
+
+
 	// Handle forward/backward movement
 	void MoveForward(float AxisValue);
 
