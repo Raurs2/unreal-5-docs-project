@@ -9,6 +9,7 @@
 #include "FireEffect.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
+#include "HealthComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -50,6 +51,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = BrakDecelerateWalk;
 	GetCharacterMovement()->MinAnalogWalkSpeed = AnalogWalkSpeed;
 
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -59,7 +61,23 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HealthComponent->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
 	
+}
+
+void APlayerCharacter::OnHealthChanged(UHealthComponent* HealthComp, float Health, float DamageAmount, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health <= 0.f)
+	{
+		Destroy();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("The Player's Current Health is: %f"), Health);
+}
+
+void APlayerCharacter::DamagePlayerCharacter()
+{
+	UGameplayStatics::ApplyDamage(this, 20.f, GetInstigatorController(), this, GenericDamageType);
 }
 
 void APlayerCharacter::MoveForward(float AxisValue)
@@ -166,5 +184,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Bind the find actor function to the input
 	PlayerInputComponent->BindAction("FindActor", IE_Pressed, this, &APlayerCharacter::FindActor);
+
+	// Bind the damage function to the input
+	PlayerInputComponent->BindAction("TakeDamage", IE_Pressed, this, &APlayerCharacter::DamagePlayerCharacter);
 }
 

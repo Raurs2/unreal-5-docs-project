@@ -54,6 +54,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraDistance = 300.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UHealthComponent* HealthComponent;
+
+	UFUNCTION()
+	void OnHealthChanged(UHealthComponent* HealthComp, float Health, float DamageAmount, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UFUNCTION()
+	void DamagePlayerCharacter();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<UDamageType> GenericDamageType;
+
 
 	// Handle forward/backward movement
 	void MoveForward(float AxisValue);
