@@ -83,6 +83,10 @@ protected:
 
 	void FindActor();
 
+	virtual void Destroyed() override;
+
+	void CallRestartPlayer();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

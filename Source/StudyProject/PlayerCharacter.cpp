@@ -10,6 +10,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "HealthComponent.h"
+#include "CharacterMovementGameModeBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -150,6 +151,35 @@ void APlayerCharacter::FindActor()
 	}
 }
 
+void APlayerCharacter::Destroyed()
+{
+	Super::Destroyed();
+	if (UWorld* World = GetWorld())
+	{
+		if (ACharacterMovementGameModeBase* GameMode = Cast<ACharacterMovementGameModeBase>(World->GetAuthGameMode()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Broadcasting Player"));
+			GameMode->GetOnPlayerDied().Broadcast(this);
+		}
+	}
+}
+
+void APlayerCharacter::CallRestartPlayer()
+{
+	AController* ControllerRef = GetController();
+
+	Destroy();
+
+
+	if (UWorld* World = GetWorld())
+	{
+		if (ACharacterMovementGameModeBase* GameMode = Cast<ACharacterMovementGameModeBase>(World->GetAuthGameMode()))
+		{
+			GameMode->RestartPlayer(ControllerRef);
+		}
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -187,5 +217,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Bind the damage function to the input
 	PlayerInputComponent->BindAction("TakeDamage", IE_Pressed, this, &APlayerCharacter::DamagePlayerCharacter);
+
+	// Bind the restart function to the input
+	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APlayerCharacter::CallRestartPlayer);
 }
 
