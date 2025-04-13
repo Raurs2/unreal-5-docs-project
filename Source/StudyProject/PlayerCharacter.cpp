@@ -11,6 +11,8 @@
 #include "Components/AudioComponent.h"
 #include "HealthComponent.h"
 #include "CharacterMovementGameModeBase.h"
+#include "MySaveGame.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -158,7 +160,6 @@ void APlayerCharacter::Destroyed()
 	{
 		if (ACharacterMovementGameModeBase* GameMode = Cast<ACharacterMovementGameModeBase>(World->GetAuthGameMode()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Broadcasting Player"));
 			GameMode->GetOnPlayerDied().Broadcast(this);
 		}
 	}
@@ -176,6 +177,37 @@ void APlayerCharacter::CallRestartPlayer()
 		if (ACharacterMovementGameModeBase* GameMode = Cast<ACharacterMovementGameModeBase>(World->GetAuthGameMode()))
 		{
 			GameMode->RestartPlayer(ControllerRef);
+		}
+	}
+}
+
+void APlayerCharacter::SaveGame()
+{
+	if (UMySaveGame* SaveGameInstance = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass())))
+	{
+		if (ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		{
+			SaveGameInstance->PlayerName = PlayerCharacter->GetName();
+			SaveGameInstance->Score = GetWorld()->GetRealTimeSeconds();
+			SaveGameInstance->PlayerLocation = PlayerCharacter->GetActorLocation();
+
+			UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("MySaveSlot"), 0);
+			UE_LOG(LogTemp, Warning, TEXT("Saved Player Name: %s"), *SaveGameInstance->PlayerName);
+		}
+	}
+}
+
+void APlayerCharacter::LoadGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("MySaveSlot"), 0))
+	{
+		if (UMySaveGame* LoadGameInstance = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("MySaveSlot"), 0)))
+		{
+			if (ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+			{
+				PlayerCharacter->SetActorLocation(LoadGameInstance->PlayerLocation);
+				UE_LOG(LogTemp, Warning, TEXT("Loaded Player Name: %s"), *LoadGameInstance->PlayerName);
+			}
 		}
 	}
 }
@@ -220,5 +252,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Bind the restart function to the input
 	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APlayerCharacter::CallRestartPlayer);
+
+	// Bind the save game function to the input
+	PlayerInputComponent->BindAction("Save", IE_Pressed, this, &APlayerCharacter::SaveGame);
+
+	// Bind the load game function to the input
+	PlayerInputComponent->BindAction("Load", IE_Pressed, this, &APlayerCharacter::LoadGame);
 }
 

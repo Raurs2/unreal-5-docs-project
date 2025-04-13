@@ -6,6 +6,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "PlayerCharacter.h"
 
+
 ACharacterMovementGameModeBase::ACharacterMovementGameModeBase()
 {
 
@@ -31,3 +32,4 @@ void ACharacterMovementGameModeBase::PlayerDied(ACharacter* Character)
 	AController* CharacterController = Character->GetController();
 	RestartPlayer(CharacterController);
 }
+

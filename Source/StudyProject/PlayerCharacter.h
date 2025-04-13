@@ -87,6 +87,10 @@ protected:
 
 	void CallRestartPlayer();
 
+	void SaveGame();
+
+	void LoadGame();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
